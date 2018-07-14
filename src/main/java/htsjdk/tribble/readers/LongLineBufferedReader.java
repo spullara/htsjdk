@@ -61,7 +61,7 @@ public class LongLineBufferedReader extends Reader {
      */
     private boolean markedSkipLF = false;
 
-    private static final int DEFAULT_CHAR_BUFFER_SIZE = 8192;
+    private static final int DEFAULT_CHAR_BUFFER_SIZE = 128*1024*1024;
     private static final int DEFAULT_EXPECTED_LINE_LENGTH = 80;
 
     private StringBuilder lineBuffer = new StringBuilder(DEFAULT_EXPECTED_LINE_LENGTH);

@@ -48,16 +48,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 
@@ -499,7 +490,7 @@ public abstract class AbstractVCFCodec extends AsciiFeatureCodec<VariantContext>
                 String genotype = st.nextToken();
                 GTAlleles.add(oneAllele(genotype, alleles));
             }
-            cache.put(GT, GTAlleles);
+            cache.put(GT, Collections.unmodifiableList(GTAlleles));
         }
 
         return GTAlleles;
@@ -676,9 +667,6 @@ public abstract class AbstractVCFCodec extends AsciiFeatureCodec<VariantContext>
         // cycle through the sample names
         Iterator<String> sampleNameIterator = header.getGenotypeSamples().iterator();
 
-        // clear out our allele mapping
-        alleleMap.clear();
-
         // cycle through the genotype strings
         boolean PlIsSet = false;
         for (int genotypeOffset = 1; genotypeOffset < nParts; genotypeOffset++) {
@@ -710,25 +698,29 @@ public abstract class AbstractVCFCodec extends AsciiFeatureCodec<VariantContext>
                     } else if ( genotypeValues.get(i).equals(VCFConstants.MISSING_VALUE_v4) ) {
                         // don't add missing values to the map
                     } else {
-                        if (gtKey.equals(VCFConstants.GENOTYPE_QUALITY_KEY)) {
-                            if ( genotypeValues.get(i).equals(VCFConstants.MISSING_GENOTYPE_QUALITY_v3) )
-                                gb.noGQ();
-                            else
-                                gb.GQ((int)Math.round(Double.valueOf(genotypeValues.get(i))));
-                        } else if (gtKey.equals(VCFConstants.GENOTYPE_ALLELE_DEPTHS)) {
-                            gb.AD(decodeInts(genotypeValues.get(i)));
-                        } else if (gtKey.equals(VCFConstants.GENOTYPE_PL_KEY)) {
-                            gb.PL(decodeInts(genotypeValues.get(i)));
-                            PlIsSet = true;
-                        } else if (gtKey.equals(VCFConstants.GENOTYPE_LIKELIHOODS_KEY)) {
-                            // Do not overwrite PL with data from GL
-                            if (!PlIsSet) {
-                                gb.PL(GenotypeLikelihoods.fromGLField(genotypeValues.get(i)).getAsPLs());
-                            }
-                        } else if (gtKey.equals(VCFConstants.DEPTH_KEY)) {
-                            gb.DP(Integer.valueOf(genotypeValues.get(i)));
-                        } else {
-                            gb.attribute(gtKey, genotypeValues.get(i));
+                        switch (gtKey) {
+                            case VCFConstants.GENOTYPE_QUALITY_KEY:
+                                if ( genotypeValues.get(i).equals(VCFConstants.MISSING_GENOTYPE_QUALITY_v3) )
+                                    gb.noGQ();
+                                else
+                                      gb.GQ((int)Math.round(Double.valueOf(genotypeValues.get(i))));
+                                break;
+                            case VCFConstants.GENOTYPE_ALLELE_DEPTHS:
+                                gb.PL(decodeInts(genotypeValues.get(i)));
+                                PlIsSet = true;
+                                break;
+                            case VCFConstants.GENOTYPE_LIKELIHOODS_KEY:
+                                // Do not overwrite PL with data from GL
+                                if (!PlIsSet) {
+                                    gb.PL(GenotypeLikelihoods.fromGLField(genotypeValues.get(i)).getAsPLs());
+                                }
+                                break;
+                            case VCFConstants.DEPTH_KEY:
+                                gb.DP(Integer.valueOf(genotypeValues.get(i)));
+                                break;
+                            default:
+                                gb.attribute(gtKey, genotypeValues.get(i));
+                                break;
                         }
                     }
                 }
