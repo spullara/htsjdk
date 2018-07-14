@@ -667,6 +667,9 @@ public abstract class AbstractVCFCodec extends AsciiFeatureCodec<VariantContext>
         // cycle through the sample names
         Iterator<String> sampleNameIterator = header.getGenotypeSamples().iterator();
 
+        // clear the allele map
+        alleleMap.clear();
+
         // cycle through the genotype strings
         boolean PlIsSet = false;
         for (int genotypeOffset = 1; genotypeOffset < nParts; genotypeOffset++) {
