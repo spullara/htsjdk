@@ -471,6 +471,7 @@ public abstract class AbstractVCFCodec extends AsciiFeatureCodec<VariantContext>
         return alleles.get(i);
     }
 
+    private static Map<String, List<String>> tokenCache = new HashMap<>();
 
     /**
      * parse genotype alleles from the genotype string
@@ -484,11 +485,22 @@ public abstract class AbstractVCFCodec extends AsciiFeatureCodec<VariantContext>
         List<Allele> GTAlleles = cache.get(GT);
 
         if ( GTAlleles == null ) {
-            StringTokenizer st = new StringTokenizer(GT, VCFConstants.PHASING_TOKENS);
-            GTAlleles = new ArrayList<Allele>(st.countTokens());
-            while ( st.hasMoreTokens() ) {
-                String genotype = st.nextToken();
-                GTAlleles.add(oneAllele(genotype, alleles));
+            List<String> tokens = tokenCache.get(GT);
+            if (tokens == null) {
+                tokens = new ArrayList<>();
+                StringTokenizer st = new StringTokenizer(GT, VCFConstants.PHASING_TOKENS);
+                GTAlleles = new ArrayList<Allele>(st.countTokens());
+                while ( st.hasMoreTokens() ) {
+                    String genotype = st.nextToken();
+                    GTAlleles.add(oneAllele(genotype, alleles));
+                    tokens.add(genotype);
+                }
+                tokenCache.put(GT, tokens);
+            } else {
+                GTAlleles = new ArrayList<Allele>(tokens.size());
+                for (String genotype : tokens) {
+                    GTAlleles.add(oneAllele(genotype, alleles));
+                }
             }
             cache.put(GT, Collections.unmodifiableList(GTAlleles));
         }
