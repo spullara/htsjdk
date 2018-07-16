@@ -550,7 +550,7 @@ public abstract class Genotype implements Comparable<Genotype>, Serializable {
             }
             return Collections.EMPTY_LIST;
         } else if (key.equals(VCFConstants.GENOTYPE_PL_KEY)) {
-            if (()) {
+            if (hasPL()) {
                 final List<Integer> intList = new ArrayList<Integer>(getPL().length);
                 for(int i : getPL()) intList.add(i);
                 return intList;
