@@ -721,6 +721,9 @@ public abstract class AbstractVCFCodec extends AsciiFeatureCodec<VariantContext>
                                       gb.GQ((int)Math.round(Double.valueOf(genotypeValues.get(i))));
                                 break;
                             case VCFConstants.GENOTYPE_ALLELE_DEPTHS:
+                                gb.AD(decodeInts(genotypeValues.get(i)));
+                                break;
+                            case VCFConstants.GENOTYPE_PL_KEY:
                                 gb.PL(decodeInts(genotypeValues.get(i)));
                                 PlIsSet = true;
                                 break;
