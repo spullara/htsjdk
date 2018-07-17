@@ -125,6 +125,8 @@ public class Allele implements Comparable<Allele>, Serializable {
     private boolean isSymbolic = false;
 
     private byte[] bases = null;
+    private String display = null;
+
 
     /** A generic static NO_CALL allele for use */
     public final static String NO_CALL_STRING = ".";
@@ -167,6 +169,7 @@ public class Allele implements Comparable<Allele>, Serializable {
 
     protected Allele(final String bases, final boolean isRef) {
         this(bases.getBytes(), isRef);
+        display = bases;
     }
 
     /**
@@ -180,6 +183,7 @@ public class Allele implements Comparable<Allele>, Serializable {
      */
     protected Allele(final Allele allele, final boolean ignoreRefState) {
         this.bases = allele.bases;
+        this.display = allele.display;
         this.isRef = ignoreRefState ? false : allele.isRef;
         this.isNoCall = allele.isNoCall;
         this.isSymbolic = allele.isSymbolic;
@@ -439,7 +443,12 @@ public class Allele implements Comparable<Allele>, Serializable {
      *
      * @return the allele string representation
      */
-    public String getDisplayString() { return new String(bases); }
+    public String getDisplayString() {
+        if (display == null) {
+            display = new String(bases);
+        }
+        return display;
+    }
 
     /**
      * Same as #getDisplayString() but returns the result as byte[].

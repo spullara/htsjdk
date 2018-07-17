@@ -203,7 +203,9 @@ public abstract class Genotype implements Comparable<Genotype>, Serializable {
         boolean sawNoCall = false, sawMultipleAlleles = false;
         Allele observedAllele = null;
 
-        for ( final Allele allele : alleles ) {
+        int size = alleles.size();
+        for (int i = 0; i < size; i++) {
+            Allele allele = alleles.get(i);
             if ( allele.isNoCall() )
                 sawNoCall = true;
             else if ( observedAllele == null )
